@@ -68,16 +68,12 @@ fn set_nested_value(
             JsonExtractError::NotAnObject(format!("Parent of {} is not an object", array_name))
         })?;
 
-
         // Get or create array
         let array = current_obj
             .entry(array_name)
             .or_insert_with(|| JsonValue::Array(Vec::new()))
             .as_array_mut()
             .ok_or_else(|| JsonExtractError::NotAnArray(array_name.to_string()))?;
-
-        
-
 
         // Ensure array has enough elements if creating missing
         if create_missing {
@@ -208,16 +204,15 @@ mod tests {
         // 方法1：使用更灵活的检查（检查是否包含 "Charlie" 和 "Bob"）
         assert!(updated.contains("Charlie"));
         assert!(updated.contains("Bob"));
-        
+
         // 方法2：移除所有空白字符后检查
         let compact = updated.replace(char::is_whitespace, "");
         assert!(compact.contains(r#""authors":["Charlie","Bob"]"#));
-        
+
         // 方法3：解析为 JSON 对象检查（最好的方法）
         let parsed: serde_json::Value = serde_json::from_str(&updated).unwrap();
         let authors = parsed["authors"].as_array().unwrap();
         assert_eq!(authors[0], "Charlie");
         assert_eq!(authors[1], "Bob");
-
     }
 }
