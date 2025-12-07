@@ -1,0 +1,36 @@
+//! CLI entry point for i_edit_json - a JSON field extraction and manipulation tool
+
+use anyhow::{Context, Result};
+use clap::Command;
+use i_edit_json::{get::xcli::get_command, set::xcli::cli as set_command};
+
+fn main() -> Result<()> {
+    // Define main CLI structure
+    let mut app = Command::new("i_edit_json")
+        .version(env!("CARGO_PKG_VERSION"))
+        .author("YeMiancheng <ymc.github@gmail.com>")
+        .about("A lightweight, high-performance JSON field extraction and manipulation tool")
+        .subcommand(get_command().name("get"))
+        .subcommand(set_command().name("set"));
+
+    // Parse CLI arguments
+    let matches = app.clone().get_matches();
+
+    // Dispatch to appropriate subcommand handler
+    match matches.subcommand() {
+        Some(("get", sub_matches)) => {
+            i_edit_json::get::xcli::handle_get_command(sub_matches)
+                .context("Failed to execute get command")?;
+        }
+        Some(("set", sub_matches)) => {
+            i_edit_json::set::xcli::handle_set_command(sub_matches)
+                .context("Failed to execute set command")?;
+        }
+        _ => {
+            // Print help if no subcommand is provided
+            println!("{}", app.render_help());
+        }
+    }
+
+    Ok(())
+}
